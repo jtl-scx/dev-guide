@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Guide/Channel-API.md",
+                "file": "Channel-API.md",
                 "mode": "source",
                 "source": false
               }
@@ -150,8 +150,9 @@
   },
   "active": "70d49065eaa4c352",
   "lastOpenFiles": [
-    "Guide/seller_signup.png",
-    "Guide/Channel-API.md",
+    "Channel-API.md",
+    "Attachments/offer_listing.png",
+    "Attachments/seller_signup.png",
     "README.md.md"
   ]
 }

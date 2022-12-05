@@ -6,5 +6,7 @@
     "margin": "0",
     "downscalePercent": 100
   },
-  "attachmentFolderPath": "Guide"
+  "attachmentFolderPath": "Guide",
+  "promptDelete": false,
+  "useMarkdownLinks": true
 }

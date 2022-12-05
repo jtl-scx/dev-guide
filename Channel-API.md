@@ -13,7 +13,7 @@ With the JTL-Channel API, you can:
 
 Target Audience:
 
-* Marketplaces who want to connect with Sellers using the JTL-Software ERP System - JTL-Wawi - with a eazyAuction Subscription
+* Marketplaces who want to connect with Sellers using the JTL-Software ERP System - JTL-Wawi
 * Software Developer who want to build a connection to a Marketplace
 
 # Terminology
@@ -33,7 +33,7 @@ A Channel need to manage their Seller Accounts by itself. JTL will never be awar
 
 Each Channel must maintain a SignUp URL and Update URL. Those URLs pointing to a Login or Signup Page, hosted by the Channel itself. A Seller will create a SignUp or Update Session inside JTL-Wawi, which redirect the Seller together with a short-lived and unique SessionId to the Channel's hosted SignUp/Update URLs.
 
-![](seller_signup.png)
+![[seller_signup.png]]
 
 <div style="page-break-after: always; visibility: hidden">
 \pagebreak
