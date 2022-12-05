@@ -13,7 +13,7 @@ With the JTL-Channel API, you can:
 
 Target Audience:
 
-* Marketplaces who want to connect with Sellers using the JTL-Software ERP System - JTL-Wawi
+* Marketplaces who want to connect with Sellers using the JTL-Software ERP System - JTL-Wawi - with a eazyAuction Subscription
 * Software Developer who want to build a connection to a Marketplace
 
 # Terminology
