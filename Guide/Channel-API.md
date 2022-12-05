@@ -335,7 +335,7 @@ Seller Attributes are Global Attributes and can be used when a Seller requires i
 
 Attributes with different Types.
 
-![[scx_attributes_001 1.png]]
+![](scx_attributes_001%201.png)
 
 ```json
 // POST /v1/channel/attribute/category/DEMO-TYPES
@@ -405,7 +405,7 @@ Attributes with different Types.
 
 Using Sections / Sub-Sections to organize attribute in logical groups.
 
-![[scx_attributes_003.png]]
+![](scx_attributes_003.png)
 
 ```json
 // POST /v1/channel/attribute/category/DEMO-SECTIONS
@@ -469,7 +469,8 @@ Using Sections / Sub-Sections to organize attribute in logical groups.
 
 If one attribute can have multiply values, it is possible to create a repeatable Attribute.
 
-![[scx_attrbutes_002.png]]
+![](scx_attrbutes_002.png)
+
 
 ```json
 // POST /v1/channel/attribute/category/DEMO-MULTIPLY_ALLOWED
@@ -487,7 +488,7 @@ If one attribute can have multiply values, it is possible to create a repeatable
 
 Repeatable Sub-Sections can be used to multiply a whole Section with multiply Attributes inside.
 
-![[scx_attributes_005.png]]
+![](scx_attributes_005.png)
 
 ```json
 // POST /v1/channel/attribute/category/DEMO-REPEATABLE_SUBSECTIONS
@@ -634,7 +635,7 @@ Those Link have a time to life of 7 days, after the Offer Event was emitted. The
 
 ## Offer State
 
-![[offer_listing.png]]
+![](offer_listing.png)
 
 It is recommended to Inform the Seller about the processing status of their offers. Most Marketplace have an asynchronous Listing Process, where the Offer Data is curated in a semi-automated process—which may take some time.
 
@@ -896,7 +897,7 @@ Send OrderItem Status change
 
 ## Cancellation (by Seller)
 
-![[order_cancellation.png]]
+![](order_cancellation.png)
 
 - Sellers send a cancellation request together with a `CancellationRequestId` (UUID) which the client, i.e., the JTL-Wawi, should remember in order to be able to assign the response later.
 - The UUID is used for the later unique assignment of the data (OrderId / OrderItemIDs) at the client.
@@ -904,7 +905,7 @@ Send OrderItem Status change
 
 ## Cancellation (by Buyer/Marketplace)
 
-![[order_cancellation_buyer.png]]
+![](order_cancellation_buyer.png)
 
 - Buyer or Marketplace send a cancellation request together with a `CancellationRequestId` (UUID)
 - The UUID is used for the later unique assignment of the data (OrderId / OrderItemIDs) at the channel.
@@ -913,7 +914,7 @@ Send OrderItem Status change
 
 ## Return
 
-![[return.png]]
+![](return.png)
 
 ### Channel informs about upcoming return event
 
@@ -952,7 +953,7 @@ The property `requireReturnShipping`  should be set to `false` here.
 
 ## Refund
 
-![[refund.png]]
+![](refund.png)
 
 Refunds are initiated directly by the merchant e.g., after a return has been processed or after agreement with the buyer (via ticket/email/phone). The channel processes the refund and after success or failure sends a `Channel:Order.RefundProcessingResult`
 back to the merchant to ensure that a refund has been properly processed. 
