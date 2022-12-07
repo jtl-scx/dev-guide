@@ -13,19 +13,16 @@ With the JTL-Channel API, you can:
 
 Target Audience:
 
-* Marketplaces who want to connect with Sellers using the JTL-Software ERP System - JTL-Wawi - with a eazyAuction Subscription
+* Marketplaces who want to connect with Sellers using JTL-Software with an eazyAuction Subscription
 * Software Developer who want to build a connection to a Marketplace
 
 # Terminology
 
-- `Channel`: A Channel is a connection to a Marketplace or any external System which can be connected to JTL-Channel API.
--  `Seller`: A Seller is a person – identified by an ID (SellerId) – who want to offer and sells his good on the connected Channel.
-- `Events`: A Event is an action initiated from a Seller. A Channel need to react on those Events in order to create or update an Offer or to process some Post Orders actions.
--  `Seller API`: This is the counterpart for the Channel API. The ERP System JTL-Wawi is connected with the Seller API.
+- **Channel**: A Channel is a connection to a Marketplace or any external System which can be connected to JTL-Channel API.
+-  **Seller**: A Seller is a person – identified by an unique ID (SellerId) – who want to offer and sells his good on the connected Channel.
+- **Event**: A Event is an action initiated from a Seller. A Channel need to react on those Events in order to create or update an Offer or to process some Post Order actions.
+- **Seller API**: This is the counterpart for the Channel API. The ERP System JTL-Wawi is connected with the Seller API.
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
 
 # Seller Management
 
@@ -43,7 +40,7 @@ Each Channel must maintain a SignUp URL and Update URL. Those URLs pointing to a
 
 The aim of the sign-up process is to avoid managing sensitive access data to a marketplace within the client environment or SCX. The channel itself has sovereignty over the access data to the connected marketplace.
 
--  Channel has a SignUp URL
+- Channel has a SignUp URL
 - A sign-up is initiated via the Seller-API
 - The JTL-Wawi of the customer account redirects to the SignUp URL (via web browser).
 - The destination of the SignUp URL is a website hosted by the channel. On this website the registration process takes place
@@ -220,13 +217,9 @@ Acknowledge previous received events.
 
 # Listing Process
 
-In the SCX context, there is no concept of a product catalog. Only offer data is transmitted via the SCX interface, but this can contain detailed product data if required by the Channel.
+In the SCX context, there is no concept of a product catalog. Only offer data is transmitted via the SCX interface, but this can contains detailed product data as well, if required by the Channel.
 
 A Channel must provide descriptive Data to describe how an Offer Listing may look like on a connected Marketplace.
-
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
 
 ## Prices Types
 
@@ -330,6 +323,13 @@ Category Attributes are related to a `categoryId` inside the Category Tree. JTL-
 ### Seller Attributes
 
 Seller Attributes are Global Attributes and can be used when a Seller requires individual settings for their Offers. 
+
+### Item-Specific Attributes
+
+Item-specific attributes represent a special form, as these attributes are not specified by the channel, but are created and transferred by the merchant itself. These attributes provide a simple, non-schematic, key-value data structure. These Attribute will be transmitted alongside the `channelAttributeList` in each OfferNew or OfferUpdate Event
+
+These attributes are highly individual and depend on the input of the seller. However, the channel can use these attributes to provide product and offer data.
+
 
 ### API Examples
 
@@ -748,10 +748,6 @@ Order Item Status can transit into the following status
   CANCELED_BY_BUYER   | - | - | - | ✓ | - | -   
   RETURNED            | - | - | - | - | ✓ | ✓      
   REFUNDED            | - | - | - | - | - | ✓     
-
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
 
 
 ### API Examples

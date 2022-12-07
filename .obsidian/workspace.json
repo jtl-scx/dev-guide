@@ -11,12 +11,8 @@
             "id": "d8512373e09f04b1",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Channel-API.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           },
           {
@@ -26,7 +22,7 @@
               "type": "markdown",
               "state": {
                 "file": "Guide/Channel-API.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -104,7 +100,7 @@
                 "sortOrder": "alphabetical",
                 "showSearch": false,
                 "searchQuery": "",
-                "backlinkCollapsed": false,
+                "backlinkCollapsed": true,
                 "unlinkedCollapsed": true
               }
             }
@@ -142,17 +138,20 @@
               }
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 288.5,
+    "collapsed": true
   },
   "active": "70d49065eaa4c352",
   "lastOpenFiles": [
     "Channel-API.md",
+    "Guide/Channel-API.md",
+    "README.md",
     "Attachments/offer_listing.png",
-    "Attachments/seller_signup.png",
-    "README.md.md"
+    "Attachments/seller_signup.png"
   ]
 }
