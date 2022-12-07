@@ -19,10 +19,55 @@ Target Audience:
 # Terminology
 
 - **Channel**: A Channel is a connection to a Marketplace or any external System which can be connected to JTL-Channel API.
--  **Seller**: A Seller is a person – identified by an unique ID (SellerId) – who want to offer and sells his good on the connected Channel.
+- **Seller**: A Seller is a person – identified by an unique ID (SellerId) – who want to offer and sells his good on the connected Channel.
 - **Event**: A Event is an action initiated from a Seller. A Channel need to react on those Events in order to create or update an Offer or to process some Post Order actions.
 - **Seller API**: This is the counterpart for the Channel API. The ERP System JTL-Wawi is connected with the Seller API.
 
+# Development Cycle and Workflow
+
+Sandbox: https://scx-sbx.api.jtl-software.com
+Production: https://scx.api.jtl-software.com 
+
+## Prerequisite
+
+In order to access the SCX - API you will need an API Refresh Token. Those Token are created during a onboarding process together with JTL. If you are interested to connect your Marketplace with the JTL ecosystem, get in touch with us.
+
+https://www.jtl-software.de/kontakt
+
+## Development
+
+A Channel Implementation run in your own Infrastructure. You as a Channel Integrator have the full responsibility to run, manage and secure your application.
+
+## Setup a local JTL-Wawi instance
+
+It may be helpful to use JTL-Wawi ERP System during Development in Order to create new Listings or manage orders. 
+
+To connect the ERP System with the Sandbox Environment
+
+Install a JTL-Wawi Version 1.6+. Connect to the MSSQL Server directly
+
+Add Seller's refresh Token - such a Token will be created during onboarding process.
+
+```sql
+INSERT INTO SCX.tRefreshToken 
+(cRefreshToken, nType)
+VALUES 
+(N'<SellerAPI-RefreshToken>', 1);
+```
+
+Switch SCX Host to Sandybox
+
+```sql
+UPDATE dbo.tOptions 
+SET cValue ='https://scx-sbx.api.jtl-software.com)' 
+WHERE ckey = 'SCX.URL'
+```
+
+Restart JTL-Wawi
+
+## Using the Seller-API directly
+
+In order to test Workflows and send Test Data to the Channel-API, you can directly use the Seller-API. See Documentation and Postman Collection in [Links and other Resources](Channel-API.md#Links%20and%20other%20Resources)
 
 # Seller Management
 
@@ -217,7 +262,7 @@ Acknowledge previous received events.
 
 # Listing Process
 
-In the SCX context, there is no concept of a product catalog. Only offer data is transmitted via the SCX interface, but this can contains detailed product data as well, if required by the Channel.
+In the SCX context, there is no concept of a product catalog. Only offer data is transmitted via the SCX interface, but this can contain detailed product data as well, if required by the Channel.
 
 A Channel must provide descriptive Data to describe how an Offer Listing may look like on a connected Marketplace.
 
@@ -951,8 +996,25 @@ The property `requireReturnShipping`  should be set to `false` here.
 
 ![](refund.png)
 
-Refunds are initiated directly by the merchant e.g., after a return has been processed or after agreement with the buyer (via ticket/email/phone). The channel processes the refund and after success or failure sends a `Channel:Order.RefundProcessingResult`
+Refunds are initiated directly by the merchant, e.g. after a return has been processed or after agreement with the buyer (via ticket/email/phone). The channel processes the refund and after success or failure sends a `Channel:Order.RefundProcessingResult`
 back to the merchant to ensure that a refund has been properly processed. 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
+
+# Links and other Resources
+
+Channel-API Documentation
+https://scx-sandbox.ui.jtl-software.com/docs/api_channel.html
+
+Seller-API Documentation
+https://scx-sandbox.ui.jtl-software.com/docs/api_seller.html
+
+Postman Collection
+https://www.postman.com/jtl-eazyauction/workspace/jtl-scx-public
+
+JTL-Guide 
+https://guide.jtl-software.de/
+
+
+
+
+
+
