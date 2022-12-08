@@ -59,7 +59,7 @@ Switch SCX Host to Sandbox
 
 ```sql
 UPDATE dbo.tOptions 
-SET cValue ='https://scx-sbx.api.jtl-software.com)' 
+SET cValue ='https://scx-sbx.api.jtl-software.com' 
 WHERE ckey = 'SCX.URL'
 ```
 
