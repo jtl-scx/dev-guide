@@ -1,52 +1,121 @@
 
 > The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
 
-# Key Features
+# Dev-Guide
 
 With the JTL-Channel API, you can:
 
--  Describe connected Marketplace Data Structure by providing Category and Attribute Data
--  Manage Product and Offer Listings
--  Update Price and Quantity of an Offer Listing
--  Manage Orders
--  Handle the Post Order Process (Return, Refund)
+-  Describe connected marketplace data structure by providing category and attribute data
+-  Manage product and offer listings
+-  Update price and quantity of a listing
+-  Manage orders
+-  Manage the post-order process (returns, refunds)
 
 Target Audience:
 
-* Marketplaces who want to connect with Sellers using JTL-Software with an eazyAuction Subscription
-* Software Developer who want to build a connection to a Marketplace
+- Marketplaces who wanting to connect with sellers who use JTL-Software with an eazyAuction subscription
+- Software developers who want to connect to a marketplace
 
-# Terminology
+## Terminology
 
-- **Channel**: A Channel is defined as a connection to a Marketplace or any external System which can be connected to JTL-Channel API.
-- **Seller**: A Seller is a person – identified by an unique ID (SellerId) – who want to offer and sells his good on the connected Channel.
-- **Event**: A Event is an action initiated by a Seller. A Channel needs to react to Events in order to create or update an Offer, or to process certain Post Order actions.
-- **Seller API**: This is the counterpart for the Channel API. The ERP System JTL-Wawi is connected with the Seller API.
+- **Channel**: A channel is defined as a connection to a marketplace or any external system which can be connected to the JTL-Channel API.
+- **Seller**: A seller is a person identified by a unique ID (SellerId) who wants to offer and sell his goods on the connected Channel.
+- **Event**: An Event is an action initiated from a seller. A channel need to react to events in order to create or update a listing or to process post order actions.
+- **Seller API**: This is the Channel API counterpart. The ERP system JTL-Wawi is connected with the Seller API.
 
-# Development Cycle and Workflow
+## Development cycle
 
 Sandbox: https://scx-sbx.api.jtl-software.com
 Production: https://scx.api.jtl-software.com 
 
-## Prerequisite
+### Prerequisite
 
-In order to access the SCX - API you will need an API Refresh Token. These Tokens are created during a onboarding process together with JTL. If you are interested in connecting your Marketplace with the JTL ecosystem, just get in touch with us.
+To access the JTL-Channel API you will need an API refresh token. These token are created during the onboarding process 
+together with JTL. If you are interested to connect your marketplace with the JTL ecosystem, please do not hesitate to contact us.
 
 https://www.jtl-software.de/kontakt
 
-## Development
+### Development
 
-A Channel Implementation runs in your own Infrastructure. You as a Channel Integrator have the full responsibility to run, manage and secure your application.
+The Channel implementation runs on your own infrastructure. You as the Channel integrator have the full responsibility to 
+run, manage and secure your application.
 
-## Setup a local JTL-Wawi instance
+## Error Handling
 
-It may be helpful to use JTL-Wawi ERP System during Development in order to create new Listings or manage orders. 
+Error responses are indicated by an HTTP status code >=400. The Channel API uses a consistent error response format for all API errors.
 
-To connect the ERP System with the Sandbox Environment
+```json
+{
+    "errorList": [
+        {
+            "code": "VAL100",
+            "message": "orderList[0].sellerId: SellerId darf nicht leer sein und maximal 50 alphnumerische Zeichen beinhalten",
+            "severity": "error",
+            "hint": null
+        },
+        {
+            "code": "VAL100",
+            "message": "orderList[0].orderStatus: Ungültiger oder unbekannter Order Status. Muss einer der folgenden Werte sein UNACKED, CREATED, ACCEPTED, SHIPPED, PARTIALLY_SHIPPED, CANCELED_BY_SELLER, CANCELED_BY_BUYER",
+            "severity": "error",
+            "hint": null
+        },
+        {
+            "code": "VAL100",
+            "message": "orderList[0].orderStatus: Ungültiger oder unbekannter Order Status. Muss einer der folgenden Werte sein UNACKED, CREATED, ACCEPTED, SHIPPED, PARTIALLY_SHIPPED, CANCELED_BY_SELLER, CANCELED_BY_BUYER",
+            "severity": "error",
+            "hint": null
+        }
+    ]
+}
+```
 
-Install a JTL-Wawi Version 1.6+. Connect to the MSSQL Server directly
+We are supporting language `de` (German) as default. This can be changed to `en` by setting the `Accept-Language` header.
 
-Add Seller's refresh Token - this Token will be created during onboarding process.
+## Rate Limiting
+
+API Rate Limiting is the practice of restricting the number of requests a user can make to an API within a given timeframe. 
+This ensures fair usage by preventing any single user from overloading the system, which can degrade the API's performance for others. 
+Rate limiting is essential for maintaining optimal service operation, protecting against abusive traffic patterns such as DDoS attacks, 
+and managing server resources efficiently.
+
+In general API calls are limited. Exceeding the rate limit results in an HTTP 429 "too many requests" error. 
+For some endpoints the rate limit is lower to ensure the best quality for all API users.
+
+### Best Practice
+
+Distribute your requests evenly over time and avoid sending large volumes of data simultaneously. 
+Adhere to the designated limits for each interface. Doing so prevents congestion in our systems and maintains a 
+seamless experience for all users. Please refer to the X-RateLimit-Limit, X-RateLimit-Interval-Length-Seconds and X-RateLimit-Remaining
+response headers to monitor your current usage against the established limits. These headers provide real-time information on your quota, 
+how many requests you have left, and when the limit will reset, respectively.
+
+### Limits (Production)
+
+| API Route Pattern                                  | Requests                      | Interval (Seconds) |
+|----------------------------------------------------|-------------------------------|--------------------|
+| Default                                            | 10                            | 60                 |
+| /v[version]/channel*                               | 60                            | 60                 |
+| /v[version]/channel/order*                         | 600                           | 60                 |
+| /v[version]/channel/event*                         | 240                           | 60                 |
+| /v[version]/channel/offer*                         | 1500                          | 60                 |
+| /v[version]/channel/attribute/category*            | 86400                         | 86400              |
+| /v[version]/channel/attribute/global*              | 10                            | 3600               |
+| /v[version]/channel/categories*                    | 10                            | 3600               |
+| /v[version]/channel/categories*                    | 10                            | 3600               |
+| /v[version]/channel/categories*                    | 5                             | 1800               |
+
+Rate Limits on Sandbox environment are different. Please refer to the X-RateLimit-Limit, 
+X-RateLimit-Interval-Length-Seconds and X-RateLimit-Remaining.
+
+### Setup of a local JTL-Wawi instance
+
+It may be helpful to use the JTL-Wawi ERP System during development to create new listings or manage orders. 
+
+To connect the ERP System with the sandbox environment install a JTL-Wawi Version 1.8+. 
+
+Connect to  MSSQL Server directly 
+
+Add the seller's refresh token - the token will be created during onboarding process.
 
 ```sql
 INSERT INTO SCX.tRefreshToken 
@@ -55,62 +124,65 @@ VALUES
 (N'<SellerAPI-RefreshToken>', 1);
 ```
 
-Switch SCX Host to Sandbox
+Switch API Host to Sandbox
 
 ```sql
 UPDATE dbo.tOptions 
-SET cValue ='https://scx-sbx.api.jtl-software.com' 
+SET cValue ='https://scx-sbx.api.jtl-software.com)' 
 WHERE ckey = 'SCX.URL'
 ```
 
 Restart JTL-Wawi
 
-## Using the Seller-API directly
+### Using the Seller-API directly
 
-In order to test out Workflows and to send Test Data to the Channel API, you can directly use the Seller API. See the Documentation and our Postman Collection in [Links and other Resources](Channel-API.md#Links%20and%20other%20Resources)
+To test workflows and to send test data to the channel API, you can directly use the Seller API. 
+Please see the technical documentation and our Postman Collection in.
 
-# Seller Management
+## Seller Management
 
-A Channel must manage Seller Accounts by itself. JTL will never be aware of any credentials which are required by an individual Seller to connect to a Marketplace or an external System (including API Credentials).
+A channel must manage seller accounts autonomously. JTL will never be aware of any credentials required by an 
+individual seller to connect to a Marketplace or an external system (including API credentials).
 
-Each Channel must maintain a SignUp URL and an Update URL. These URLs must point respectively to a Login or Signup Page hosted by the Channel itself. A Seller will create a SignUp or Update Session inside the JTL-Wawi, which will redirect the Seller together with a short-lived and unique SessionId to the Channel's hosted SignUp and Update URLs.
+Each channel must maintain a sign-up URL and an update URL. The sign-up URL must point at a login page and the update 
+URL at a sign-up page, both hosted by the channel itself. A seller will create a sign-up or update session in JTL-Wawi. 
+From there, they will be redirected to the sign-up and update URLS hosted by the channel and receive a unique one-time 
+session ID.session ID
 
 ![](seller_signup.png)
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
+### Seller sign-up
 
-## Seller SignUp
+The aim of the sign-up process is to avoid managing sensitive access data to a marketplace within the client 
+environment or SCX. The channel itself has sovereignty over the access data to the connected marketplace.
 
-The aim of the sign-up process is to avoid managing sensitive data access to a marketplace within the client environment or SCX. The channel itself has sovereignty over the access data to the connected marketplace.
+- Channel has a sign-up URL
+- A sign-up is initiated via the Seller API
+- The seller's JTL-Wawi redirects to the sign-up URL (via web browser).
+- The destination of the sign-up URL is a website hosted by the channel. On this website the registration process takes place
+- The channel authenticate and stores a new seller and assigns a unique Seller ID.
+- The channel reports the generated Seller ID together with the Session ID back to SCX.
+- SCX stores the Seller ID to the channel and reports all events with this Seller ID to the channel from now on.
 
-- Channel has a SignUp URL
-- A sign-up is initiated via the Seller-API
-- The JTL-Wawi of the customer account redirects to the SignUp URL (via web browser).
-- The destination of the SignUp URL is a website hosted by the channel. On this website the registration process takes place.
-- The channel registers and stores a new seller and assigns a unique SellerId.
-- The channel reports the generated SellerId together with the SessionId back to SCX.
-- SCX stores the SellerId to the channel and reports all further events to the channel with this SellerId.
+### SignUp Example
 
-### API Examples
-
-Create a new SignUp SessionId
+Create a new SignUp Session ID
 
 ```json
 // POST /v1/seller/channel/MYCHANNEL
-
 {
   "signUpUrl": "https://www.mychannel.com/?session=demoSessionId123&expiresAt=1646759360",
   "expiresAt": 1646759360
 }
 ```
 
-The Seller is then redirected to the `signUpUrl`.
+Seller is now redirected to the `signUpUrl`.
 
-On the SignUp Page, the Channel must ask for Seller identification. If a Seller is considered as valid and authenticated, the Channel itself must create a unique SellerId and send them together with the SessionId, from the SignUp URL to the Channel API.
+On the sign-up page, the channel must ask for seller identification. If a seller is deemed valid and authenticated,
+the Channel itself must create a unique Seller ID and send it, along with the Session ID, from the sign-up URL to the Channel API.
 
-**_Note_**: All Events received from the Channel API will have this SellerId. This SellerId is immutable and can not be changed afterwards.
+**_Note_**: All events received from the Channel API will have this Seller ID.
+This Seller ID is immutable and cannot be changed afterwards.
 
 ```json
 // POST /v1/channel/seller 
@@ -122,26 +194,24 @@ On the SignUp Page, the Channel must ask for Seller identification. If a Seller 
 }
 ```
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
+### Seller Update
 
-## Seller Update
+Sometimes, it may be necessary to update the connection between a JTL account and the seller. For example, the access 
+data pertaining to the marketplace may have been changed. In cases like this, the JTL account must be able to update 
+this data on the channel.
 
-From time to time, it may be necessary for a JTL-Account to update the connection to its Seller. As an example, the access data pertaining to the marketplace may have been renewed. In cases like this, the JTL account must be able to update this data on the channel.
-
-- Channel has an Update URL defined.
-- An update process is initiated using the Seller API.
-- The client of the JTL Account (JTL-Wawi) redirects the User to the update URL
+- An update URL has been defined for the channel.
+- The update process is initiated using the Seller API.
+- The client of the JTL account (JTL-Wawi) redirects the user to the update URL.
 - The target of the update URL is a website hosted by the channel. On this website the update process takes place.
-- The channel asks SCX which SellerId belongs to the current update SessionID.
-- The channel enables an update of the seller.
+- The channel asks SCX which seller ID belongs to the current update Session ID.
+- The channel enables an update of the seller account.
 - After the update process, the channel can also update the seller on the SCX system.
 
-### API Examples
 
-The Seller update process in initiated by creating an Update URL for the Channel
+### Update examples
 
+Seller update process in initiated by creating an update URL for the Channel
 
 ```json
 // PATCH /v1/seller/channel/MYCHANNEL?sellerId=1
@@ -152,46 +222,87 @@ The Seller update process in initiated by creating an Update URL for the Channel
 }
 ```
 
-The Seller is then redirected to the Update URL from the Channel, along with a short-lived SessionId.
+The seller is then redirected to the update URL by the channel and receives a one-time session ID.
 
-For security reasons, the SellerId is not part of the Update URL and can be received through a separate call.
+For security reasons, the seller ID is not part of the update URL and must be received through a separate call.
 
 ```json
-// GET /v1/channel/seller/update-session?sessionId=xyz
+// GET /v1/channel/seller/update-session?sessionId=demoUpdateSessionId123
 
 {
   "sellerId": "1"
 }
 ```
 
-After the update workflow is handed over, the Channel may now update the Seller at Channel API.
+After the update workflow is handed, the Channel may now update the Seller at Channel API.
 
 ```json
-// PARTH /v1/channel/seller
+// PATCH /v1/channel/seller
 
 
 {
-  "sessionId": "demoUpdateSessionId",
+  "sessionId": "demoUpdateSessionId123",
   "isActive": true,
   "companyName": "JTL-Software-GmbH"
 }
 ```
 
-# Seller-Events
+### Seller unlink
 
-One important component of SCX are Seller and Channel Events. Seller Events are emitted by a Seller integration, such as the JTL-Wawi, while Channel Events are emitted by a Channel Integration. Such events are actions created by an actor (either a Seller or a Channel) and may be handled by connected integrations.
+There are different scenarios when a Seller reach a state where he is forbidden to use a Channel.
 
-A Channel Integration needs to handle the various Seller Events provided by `GET /v1/channel/events` in order to create new Offer listings, and mark orders as paid or shipped.
+- Sellers deactivate the connection on their own behalf.
+- Seller does not have an active JTL-eazyAuction subscription to use the SCX system.
 
-We recommend calling the Seller Event Endpoint in a regular interval (such as once a minute) and consume all Events available.
+In this scenario, as the channel, you receive a `Seller:Channel.Unlinked` event.
 
-When a event is consumed, it must be acknowledged by calling `DELETE /v1/channel/events`. Otherwise the Event will be transmitted again after a timeout.
+```json
+{
+  "sellerId": "1",
+  "reason": "deactivated by Seller",
+  "unlinkedAt": "2024-02-13T06:00:00+0000",
+  "permanentlyRemoved": false
+}
+```
 
-Events will be transmitted a maximum of 10 times. Afterwards it will be marked as a dead-letter and will be not transmitted again.
+We recommend that you deactivate a Seller in your system. SCX will not accept any more data for that seller ID until the 
+seller initiates a seller update process as described above. You should not delete a Seller ID from your system 
+if `permanentlyRemoved` is set to `false`.
 
-## API Examples
+When the `permanentlyRemoved` property is set to `true`, the Seller ID is completely removed from the 
+SCX system and is no longer known, so you can delete the Seller ID on your end as well.
 
-Receive Seller Events
+There are scenarios where you need to unlink a seller ID on your behalf. 
+
+* API credentials become invalid or are revoked, requiring you to reauthorize the Seller ID
+* Seller does not have an active contract or subscription with your company
+* There is suspicious behavior on your end, and you want to stop the seller's activity.
+
+You can do that by sending a `DELETE /v1/channel/sellerId/{sellerId}` request. 
+Do not delete the seller ID in your system until you receive a `Seller:Channel.Unlinked` event 
+with `"permanentlyRemoved": true`.
+
+## Events
+
+Two important components of SCX are seller and channel events. Seller events are triggered by a seller integration such 
+as JTL-Wawi, while channel events are triggered by a channel integration. Such events are actions created by an actor 
+(either a seller or a channel) and may be handled by connected integrations.
+
+A channel integration needs to handle the various seller events provided by `GET /v1/channel/events` in order to create n
+ew listings, and mark orders as paid or shipped.
+
+We recommend calling the seller event endpoint at regular intervals (such as once a minute) and consuming all events 
+available.
+
+When an event is consumed, it must be acknowledged by calling `DELETE /v1/channel/events`. Otherwise, the event will be 
+transmitted again after a timeout.
+
+An event will be transmitted a maximum of 10 times. Afterwards it will be marked as a dead-letter and will 
+not be transmitted again.
+
+### Event Examples
+
+Receive Seller events
 
 ```json
 // GET /v1/channel/event
@@ -227,7 +338,7 @@ Receive Seller Events
                         ]
                     }
                 ],
-                "title": "Bike rack",
+                "title": "Fahrrad Halterung",
                 "channelAttributeList": [
                     {
                         "attributeId": "WAWI-61427_number_category",
@@ -239,12 +350,12 @@ Receive Seller Events
             },
             "createdAt": "2022-11-02T14:38:53+00:00",
             "type": "Seller:Offer.New"
-        },
+        }
 	]
 }
 ```
 
-Acknowledge previously received events.
+Acknowledge previous received events.
 
 ```json
 // DELETE /v1/channel/event
@@ -256,19 +367,18 @@ Acknowledge previously received events.
     ]
 }
 ```
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
 
-# Listing Process
+## Listing Process
 
-Within the SCX context there is no concept of a product catalog. Only offer data is transmitted via the SCX interface, this can however contain detailed product data as well- if required by the Channel.
+Within the SCX context, there is no concept of a product catalogue. Only listing data is transmitted via the SCX interface. 
+This can, however, also contain detailed product data, if required by the channel.
 
-A Channel must provide descriptive Data to describe what an Offer Listing may look like on a connected Marketplace.
+A channel must provide descriptive data to describe what a listing may look like on a connected marketplace.
 
-## Prices Types
+### Prices Types
 
-There must be at lead one Price Type available to create a listing on a connected Marketplace. Examples for Price Types are B2C or B2B prices.
+There must be at least one price type available to create a listing on a connected marketplace. 
+Examples of price types are B2C or B2B prices.
 
 ### API Example
 
@@ -282,7 +392,7 @@ There must be at lead one Price Type available to create a listing on a connecte
 }
 ```
 
-The `priceTypeId` will be transmitted with the `Seller:Offer.New` or `Seller:Offer.Update` Seller Events. 
+The `priceTypeId` will be transmitted with the `Seller:Offer.New` or `Seller:Offer.Update` seller events. 
 
 ```json
 {
@@ -307,17 +417,13 @@ The `priceTypeId` will be transmitted with the `Seller:Offer.New` or `Seller:Off
 }
 ```
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
-
 ## Category Tree
 
-A connected Channel may provide a Category Tree to set specific Attributes related to a Category.
+A connected channel may provide a category structure to set specific attributes related to a category.
 
-### API Examples
+### Category tree example
 
-The API Endpoint is in the process of replacing the entire Category Tree.
+The API endpoint is replacing the entire category structure.
 
 ```json
 // PUT /v1/channel/categories
@@ -346,41 +452,40 @@ The API Endpoint is in the process of replacing the entire Category Tree.
 }
 ```
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
-
 
 ## Attributes
 
-Attributes provide a very simple but powerful way of describing an offer for a channel. This allows the channel to define all marketplace requirements for an offer by means of attributes.
-
-SCX differentiates between three types of Attributes. Each attribute type share the same general structure, but targets a different use case.
+Attributes provide a very simple but powerful way of describing a listing for a channel. This allows the channel to 
+define all marketplace requirements for a listing by means of attributes. SCX differentiates between three types of attributes. 
+Each attribute type shares the same general structure but targets a different use case.
 
 ### Global Attributes
 
-Global Attributes should be used when data is required for each Offer.
+Global attributes should be used when data is required for each listing.
 
 ### Category Attributes
 
-Category Attributes are related to a `categoryId` inside the Category Tree. JTL-Wawi will display these attributes only when the Offer is part of a given Category.
+Category attributes are related to a `categoryId` inside the category structure. JTL-Wawi will display these attributes 
+only when the listing is part of a given category.
 
 ### Seller Attributes
 
-Seller Attributes are Global Attributes and can be used when a Seller requires individual settings for their Offers. 
+Seller attributes are global attributes and can be used when a seller requires individual settings for their listings.
 
-### Item-Specific Attributes
+### Item-specific Attributes
 
-Item-specific attributes are not specified by the channel, but are instead created and transferred by the merchant. As such, these attributes represent a special form- each attribute must provide a simple, non-schematic, key-value data structure. These Attributes will be transmitted along with the `channelAttributeList` in each OfferNew or OfferUpdate Event.
+Item-specific attributes are not specified by the channel but are instead created and transferred by the seller. 
+As such, these attributes represent a special type — each attribute must provide a simple, non-schematic, key-value data 
+structure. These attributes will be transmitted along with the `channelAttributeList` in each OfferNew or OfferUpdate Event.
 
-These attributes are highly individual, and depend on the input of the seller. The channel can use these attributes to provide product and offer data.
+These attributes are highly specific and depend on the input of the seller. The channel can use these attributes to 
+provide product and listing data.
 
-
-### API Examples
+### Attributes Examples
 
 Attributes with different Types.
 
-![](scx_attributes_001%201.png)
+![](scx_attributes_001.png)
 
 ```json
 // POST /v1/channel/attribute/category/DEMO-TYPES
@@ -435,20 +540,20 @@ Attributes with different Types.
         {
             "attributeId": "DEMO-TYPES_image",
             "displayName": "Image",
-            "description": "Not yet supported in JTL-Wawi",
+            "description": "Link to Image file",
             "type": "image"
         },
         {
             "attributeId": "DEMO-TYPES_document",
             "displayName": "Document",
-            "description": "Not yet supported in JTL-Wawi",
+            "description": "Link to a Document file",
             "type": "document"
         }
     ]
 }
 ```
 
-Using Sections / Sub-Sections to organize attributes into logical groups.
+Using sections/sub-sections to organize attributes into logical groups
 
 ![](scx_attributes_003.png)
 
@@ -458,8 +563,8 @@ Using Sections / Sub-Sections to organize attributes into logical groups.
 {
     "attributeList": [
         {
-            "attributeId": "DEMO-SECTIONS_WAREHOUSE",
-            "displayName": "Warehouse",
+            "attributeId": "DEMO-SECTIONS_WAREHOUS",
+            "displayName": "Warehous",
             "type": "smalltext",
             "section": "Shipping",
             "sectionPosition": 100
@@ -512,13 +617,13 @@ Using Sections / Sub-Sections to organize attributes into logical groups.
 ```
 
 
-It is also possible to create repeatable attributes, as long as the attribute supports multiple values.
+It is also possible to create repeatable attributes if the attribute supports multiple values.
 
-![](scx_attrbutes_002.png)
+![](scx_attributes_002.png)
 
 
 ```json
-// POST /v1/channel/attribute/category/DEMO-MULTIPLE_ALLOWED
+// POST /v1/channel/attribute/category/DEMO-MULTIPLY_ALLOWED
 {
     "attributeList": [
         {
@@ -531,7 +636,7 @@ It is also possible to create repeatable attributes, as long as the attribute su
 }
 ```
 
-Repeatable Sub-Sections can be used to multiply an entire Section with multiple Attributes inside.
+It is also possible to create repeatable attributes if the attribute supports multiple values.
 
 ![](scx_attributes_005.png)
 
@@ -542,33 +647,33 @@ Repeatable Sub-Sections can be used to multiply an entire Section with multiple 
     "attributeList": [
         {
             "attributeId": "shipping_carrier",
-            "displayName": "Shipping carrier",
+            "displayName": "Versanddienstleister",
             "type": "enum",
             "values": [
                 {
                     "value": "carrierID_2",
-                    "display": "Letter",
+                    "display": "Brief",
                     "sort": 1
                 },
                 {
                     "value": "carrierID_3",
-                    "display": "DHL Package (Small)",
+                    "display": "DHL Päckchen",
                     "sort": 2
                 },
                 {
                     "value": "carrierID_4",
-                    "display": "DHL Package",
+                    "display": "DHL Paket",
                     "sort": 3
                 },
                 {
                     "value": "carrierID_22",
-                    "display": "Free Download",
+                    "display": "Kostenloser Download",
                     "sort": 20
                 }
             ],
-            "section": "Shipping cost",
+            "section": "Versandkosten",
             "sectionPosition": 2,
-            "subSection": "Shipping method",
+            "subSection": "Versandart",
             "subSectionPosition": 10,
             "isRepeatableSubSection": true
         },
@@ -576,9 +681,9 @@ Repeatable Sub-Sections can be used to multiply an entire Section with multiple 
             "attributeId": "shipping_cost_nat",
             "displayName": "National",
             "type": "decimal",
-            "section": "Shipping cost",
+            "section": "Versandkosten",
             "sectionPosition": 2,
-            "subSection": "Shipping method",
+            "subSection": "Versandart",
             "subSectionPosition": 9,
             "isRepeatableSubSection": true
         },
@@ -587,9 +692,9 @@ Repeatable Sub-Sections can be used to multiply an entire Section with multiple 
             "displayName": "EU",
             "isMultipleAllowed": false,
             "type": "decimal",
-            "section": "Shipping cost",
+            "section": "Versandkosten",
             "sectionPosition": 2,
-            "subSection": "Shipping method",
+            "subSection": "Versandart",
             "subSectionPosition": 8,
             "isRepeatableSubSection": true
         },
@@ -598,9 +703,9 @@ Repeatable Sub-Sections can be used to multiply an entire Section with multiple 
             "displayName": "International",
             "isMultipleAllowed": false,
             "type": "decimal",
-            "section": "Shipping cost",
+            "section": "Versandkosten",
             "sectionPosition": 2,
-            "subSection": "Shipping method",
+            "subSection": "Versandart",
             "subSectionPosition": 7,
             "isRepeatableSubSection": true
         }
@@ -608,12 +713,12 @@ Repeatable Sub-Sections can be used to multiply an entire Section with multiple 
 }
 ```
 
-When using repeatable sections, the JTL-Wawi generates a group ID, which is then transferred back to the Channel with the offer. This makes it possible to recognize related attributes in the offer data.
+When using repeatable sections, JTL-Wawi generates a group ID, which is then transferred back to the channel with the 
+listing. This makes it possible to recognize related attributes in the listing data.
 
 ```json
 // GET /v1/channel/event
 
-// Note: Simplyfied event 
 {
   "type": "Seller:Offer.New",
   "sellerId": "1",  
@@ -622,7 +727,7 @@ When using repeatable sections, the JTL-Wawi generates a group ID, which is then
   "channelAttributeList": [  
     {  
       "attributeId": "shipping_carrier",  
-      "value": "DHL Package",  
+      "value": "DHL Paket",  
       "group": "1"  
     },  
     {  
@@ -664,29 +769,32 @@ When using repeatable sections, the JTL-Wawi generates a group ID, which is then
 }
 ```
 
-# Transmitting Offers
+## Listings
 
-Offers are transmitted by `Seller:Offer.New` and `Seller:Offer.Update` Event.
-Each time the Offer Data changes the JTL-Wawi will transmit the full Offer again.
+Listings are transmitted by the `Seller:Offer.New` and `Seller:Offer.Update` event.
+Each time the listing data changes, JTL-Wawi will transmit the entire listing again.
 
 ### Essentials Properties 
 
-It is generally not necessary to provide attributes for essential data, as by default each offer already implements a set of essential properties, including a title, description, GTIN, quantity and price.
+It is generally not necessary to provide attributes for essential data, as each listing already implements a set of 
+essential properties by default, including a title, description, GTIN, quantity and price.
 
 ### Pictures / Images
 
-Product or Offer Pictures are transmitted as a Link along with the Offer Event.
-These Links have a time to live of 7 days after the Offer Event was emitted. The filename is generated based on the file content- as such, each seperate picture will have a filename similar to its file content.
+Product or listing images are transmitted as a link along with the listing event. These links have a lifetime of 7 days 
+after the listing event was triggered. The filename is generated based on the file content; i.e., each separate image 
+will have a filename similar to its file content.
 
-## Offer State
+### Listing State
 
 ![](offer_listing.png)
 
-We reccommend informing the Seller about the processing status of their offers. Most Marketplaces use an asynchronous Listing Process, where the Offer Data is curated in a semi-automated process— a process which may take some time.
+We highly recommend informing the seller about the processing status of their listings. Most marketplaces use an 
+asynchronous listing process during which the listing data is curated in a semi-automated process — a process which may take some time.
 
-### Status: In-Progress
+#### Status: In-Progress
 
-Send this status to inform the Seller that the Offer Listing process for their Offer is now in progress.
+Send this status to inform the seller that the listing process is now in progress for their listing.
 
 ```json
 // POST /v1/channel/offer/in-progress
@@ -702,9 +810,10 @@ Send this status to inform the Seller that the Offer Listing process for their O
 }
 ```
 
-### Status: Successful
+#### Status: Successful
 
-Once an Offer is successfully listed on the connected marketplace, we reccommend informing the Seller. The optional `listingUrl` is useful in this case and will let the Seller to visit and thereby directly check the listing on the connected marketplace.
+We recommend informing the seller once a listing is successfully listed on the connected marketplace. 
+The optional `listingUrl` is useful in this case and allows the seller to visit and thereby directly check the listing on the connected marketplace.
 
 ```json
 // POST /v1/channel/offer/listed
@@ -722,9 +831,9 @@ Once an Offer is successfully listed on the connected marketplace, we reccommend
 }
 ```
 
-### Status: Failed
+#### Status: Failed
 
-If the Offer failed the the listing process, inform the Seller about it. 
+You need to inform the seller if the listing process for a listing failed.
 
 ```json
 // POST v1/channel/offer/listing-failed
@@ -737,8 +846,8 @@ If the Offer failed the the listing process, inform the Seller about it.
 			"errorList": [
 				{
 					"code": "123",
-					"message": "A listing error occurred",
-					"longMessage": "A serious listing error occurred with details."
+					"message": "A listing error occur",
+					"longMessage": "A serious listing error occure."
 				}
 			],
 			"failedAt": "2019-02-09T05:33:12+00:00"
@@ -747,57 +856,54 @@ If the Offer failed the the listing process, inform the Seller about it.
 }
 ```
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
+## Order Process
 
-# Order Process
+* A new order must be created by calling `POST /v1/channel/order` first
+* The purchase date of an order must be after the creation date of the seller ID
+* The orderId is unique, and can only exist once for a seller ID
+* It is not possible to add or change order lines once an order has been created.
+* Once an order is created, it can be updated using
+  * `PUT /v1/channel/order/status` to update the status of an order or order item
+  * `PUT /v1/channel/order/address-update` to update the address information
 
-* A new Order must be created by calling `POST /v1/channel/order` first
-* The OrderId is unique, and can only exist once for a SellerId
-* Once an Order is created it can be updated using 
-	* `PUT /v1/channel/order/status` to update the status of an Order or Order Item
-	* `PUT /v1/channel/order/address-update` to update the Address information
+### Order Status
 
-## Order Status
+* `CREATED`: Orders with the status “created” are not yet ready for shipping. Orders with this status can be used for stock reservation. Once the order is ready for shipping, the status will change to `ACCEPTED`.
+* `UNACKED`: Orders with this status are not yet ready for shipping. The seller must first accept the order. **_Note_**: JTL-Wawi does not yet support order acknowledgment.
+* `ACCEPTED`: Orders with the status “accepted” are ready for shipping.
 
-* `CREATED`: Orders with the Status created are not yet ready for shipping. Orders in this status can be used for stock reservation. Once the Order is ready for shipping, the status will change to `ACCEPTED`.
-* `UNCACKED`: Orders in this Status are not yet ready for shipping. The Seller must first accept the Order. **_Note_**: The JTL-Wawi does not yet support Order Acknowledgment.
-* `ACCEPTED`: Orders with the Status accepted are ready for shipping. 
+### Order line item Status
 
-## OrderItem Status
+Each order line item has a status, and this status should be used to determine the order status itself.
 
-Each OrderItem has a status, and this status should be used to determine the Order Status itself.
+* `UNSHIPPED`: The order line item is ready for shipping and can be shipped once the order is `ACCEPTED`.
+* `SHIPPED`: The order line item is marked as having been shipped.
+* `CANCELED_BY_SELLER`: The order line item has been cancelled by the seller.
+* `CANCELED_BY_BUYER`: The order line item has been cancelled by the buyer or the marketplace.
+* `RETURNED`: The order line item has been returned to the seller.
+* `REFUNDED`: The order line item has been refunded.
 
-* *`UNSHIPPED`: The OrderItem is ready for shipping, and can be shipped once the Order is `ACCEPTED`.
-* `SHIPPED`: The OrderItem is marked as being shipped
-* `CANCELED_BY_SELLER`: The OrderItem has been cancelled by the Seller
-* `CANCELED_BY_BUYER`: The OrderItem has been cancelled by the Buyer or the Marketplace
-* `RETURNED`: The OrderItem has been returned to Seller.
-* `REFUNDED`: The OrderItem has been refunded.
+### Status transition limitations and rules
 
-## Status transition limitations and rules
+* Orders with the statuses `UNACKED` or `CREATED` may not have valid address information.
+* An address update can only apply to orders with the statuses `UNCACKED` or `CREATED`.
+* Address information must be available before a status transition to `ACCEPTED`.
+* Once an order is assigned the status `ACCEPTED`, the order status cannot be changed.
 
-* Orders with a Status of `UNACKED` or `CREATED` may not have valid Address Information
-* Address Update can only apply to Orders with a Status of `UNACKED` or `CREATED`
-* Address Information must be available before a status transition to `ACCEPTED`
-* Once an Order is set with the Status `ACCEPTED` the Order Status can not be changed
+The order item status can convey the following status information:
 
-Order Item Status can convey the following status information
-
-  Stauts | UNSHIPPED | SHIPPED | CANCELED_BY_SELLER | CANCELED_BY_BUYER | RETURNED | REFUNDED
-  --- | --- | --- | --- | --- | --- | --- 
-  UNSHIPPED           | ✓ | ✓ | ✓ | ✓ | ✓ | ✓      
-  SHIPPED             | - | ✓ | ✓ | ✓ | ✓ | ✓        
-  CANCELED_BY_SELLER  | - | - | ✓ | - | - | -  
-  CANCELED_BY_BUYER   | - | - | - | ✓ | - | -   
-  RETURNED            | - | - | - | - | ✓ | ✓      
-  REFUNDED            | - | - | - | - | - | ✓     
-
+| Stauts             | UNSHIPPED | SHIPPED | CANCELED_BY_SELLER | CANCELED_BY_BUYER | RETURNED | REFUNDED |
+|--------------------|-----------|---------|--------------------|-------------------|----------|----------|
+| UNSHIPPED          | ✓         | ✓       | ✓                  | ✓                 | ✓        | ✓        |
+| SHIPPED            | -         | ✓       | ✓                  | ✓                 | ✓        | ✓        |
+| CANCELED_BY_SELLER | -         | -       | ✓                  | -                 | -        | -        |
+| CANCELED_BY_BUYER  | -         | -       | -                  | ✓                 | -        | -        |
+| RETURNED           | -         | -       | -                  | -                 | ✓        | ✓        |
+| REFUNDED           | -         | -       | -                  | -                 | -        | ✓        |
 
 ### API Examples
 
-Create a `CREATED` Order using 
+Create a `CREATED` order using
 
 ```json
 // `POST 'https://scx-sbx.api.jtl-software.com/v1/channel/order`
@@ -829,8 +935,8 @@ Create a `CREATED` Order using
           "sku": "1234",
           "channelOfferId": "1",
           "quantity": "1",
-          "title": "Jeans (4006680069951)",
-          "note": "As a selection"
+          "title": "Eine Hose (4006680069951)",
+          "note": "Zur Auswahl"
         },
         {
           "orderItemId": "ABC-0002",
@@ -841,8 +947,8 @@ Create a `CREATED` Order using
           "sku": "ART-WAWI-55070",
           "channelOfferId": "2",        
           "quantity": 1,
-          "title": "T-Shirt (ART-WAWI-55070)",
-          "note": "As a selection"          
+          "title": "Ein Hemd (ART-WAWI-55070)",
+          "note": "Zur Auswahl"          
         }
       ]
     }
@@ -850,7 +956,7 @@ Create a `CREATED` Order using
 }
 ```
 
-Send Address Information for an order with the status `CREATED`
+Send address information for an order with the status `CREATED`
 
 ```json
 // PUT 'https://scx-sbx.api.jtl-software.com/v1/channel/order/address-update
@@ -885,7 +991,7 @@ Send Address Information for an order with the status `CREATED`
 }
 ```
 
-Update Order and set Status to `ACCEPTED`
+Update order and set status to `ACCEPTED`
 
 ```json
 // PUT 'https://scx-sbx.api.jtl-software.com/v1/channel/order/status
@@ -895,13 +1001,13 @@ Update Order and set Status to `ACCEPTED`
 		{
 			"orderId": "OrderId_000001",
 			"sellerId": "1",
-			"orderStatus": "CREATED"
+			"orderStatus": "ACCEPTED"
 		}
 	]
 }
 ```
 
-Send a Status change for an OrderItem
+Send a status change for an order line items
 
 ```json
 // PUT 'https://scx-sbx.api.jtl-software.com/v1/channel/order/status
@@ -911,7 +1017,7 @@ Send a Status change for an OrderItem
 		{
 			"orderId": "OrderId_000001",
 			"sellerId": "1",
-			"orderStatus": "CREATED",
+			"orderStatus": "ACCEPTED",
 			"orderItems": [
                 {
                     "orderItemId": "ABC-0001",
@@ -929,77 +1035,74 @@ Send a Status change for an OrderItem
 }
 ```
 
-<div style="page-break-after: always; visibility: hidden">
-\pagebreak
-</div>
+## Post-Order Processes
 
-
-# Post-Order Processes
-
-## Cancellation (by Seller)
+### Cancellation (by Seller)
 
 ![](order_cancellation.png)
 
-- Sellers send a cancellation request together with a `CancellationRequestId` (UUID) which the client, i.e., the JTL-Wawi, should remember in order to be able to assign the response later.
-- The UUID is used for the unique assignment of the data (OrderId / OrderItemIDs) at the client.
-- A cancellation should always include all items to be cancelled. If the entire order is cancelled, all order items contained must also be specified. Accordingly, however, only a partial cancellation of individual items can take place.
+- Sellers send a cancellation request together with a `CancellationRequestId` which the client, i.e., JTL-Wawi, should remember in order to be able to assign the response later on.
+- The `CancellationRequestId` is used for the unique assignment of the data (OrderId / OrderItemIDs) to the client.
+- A cancellation should always include all items to be cancelled. If the entire order is cancelled, all order items included in the order must be specified. However, if only part of the order is cancelled, only the cancelled items must be specified.
 
-## Cancellation (by Buyer/Marketplace)
+### Cancellation (by Buyer/Marketplace)
 
 ![](order_cancellation_buyer.png)
 
-- Buyers or Marketplaces send a cancellation request together with a `CancellationRequestId` (UUID)
-- The UUID is used for the unique assignment of the data (OrderId / OrderItemIDs) at the channel.
-- A cancellation should always include all items to be cancelled. If the entire order is cancelled, all order items contained must also be specified. Accordingly, however, only a partial cancellation of individual items can take place.
-- Using this Workflow on the Channel side is considered optional- it is also possible to set the Order Status to cancel.
+- Buyers or marketplaces send a cancellation request together with a `CancellationRequestId`.
+- The `CancellationRequestId` is used for the unique assignment of the data (OrderId / OrderItemIDs) to the channel.
+- A cancellation should always include all items to be cancelled. If the entire order is to be cancelled, all order items contained must also be specified. It is also possible to have partial order cancellations if only some individual items are cancelled.
+- Using this workflow on the channel side is considered optional- it is also possible to set the order status to “cancel”.
 
-## Return
+### Return
 
 ![](return.png)
 
-### Channel informs about an upcoming return event
+#### Channel informs about upcoming return event
 
-**_Note_**: This is a optional step in the Workflow. Not all Marketplaces support a Return Announcement.
+**_Note_**: This is an optional step in the workflow. Not all marketplaces support a return announcement.
 
-- Channel reports via `Channel:Order.Return`  Event that a return process has been initiated on a connected marketplace
-	- The following data is provided
-		- OrderId
-		- OrderItem List (ItemId, Quantity, Reason, Comment)
-	- The following data can optionally be provided by the channel
-		- ChannelReturnId - internal ID to identify the return case
-		- Return Tracking Information (Carrier, TrackingNo.)
+- Via the `Channel:Order.Return` event, the channel reports that a return process has been initiated on a connected marketplace.
+  - The following data is provided:
+    - OrderId
+    - OrderItem List (ItemId, Quantity, Reason, Comment)
+  - The following data can be provided optionally by the channel:
+    - ChannelReturnId - internal ID to identify the return case
+    - Return Tracking Information (Carrier, TrackingNo.)
 - JTL-Wawi stores the upcoming return case
-    - if no item return is required, the return can be answered directly via `POST /v1/seller/order/return`
-    - if a return is required the Merchant now waits for the incoming return.
+	- If no item return is required, the return can be answered directly via `POST /v1/seller/order/return`.
+	- If a return is required, the seller now waits for the incoming return.
 
 ### (Optional) Merchant decides that no return is required
 
-**_Note_**: This is a optional step in the Workflow.
+**_Note_**: This is an optional step in the workflow.
 
-The merchant has the option to decide whether the customer does not need to make a return. If no return is required, the `POST /v1/seller/order/return` can be sent by the merchant after receiving the Channel:Order.Return event.
-The property `requireReturnShipping`  should be set to `false` here.
+The seller has the option to decide whether the customer needs to make a return. If no return is required, 
+the `POST /v1/seller/order/return` can be sent by the seller after receiving the Channel:Order.Return event.
+The property `requireReturnShipping` should be set to `false` here.
 
-### Return shipment arrives at the merchant's warehouse
+### Return shipment arrives at the seller’s warehouse
 
-- Once the return has arrived, the merchant will check the items and confirm the return using `POST /v1/seller/order/return`.
-- If a return already exists in JTL Wawi, the information stored there should be used to transfer the return to SCX.
-	- This information includes the `channelReturnId`
-- Furthermore, information about the individual order items must be transferred
-	- The order number (orderId) 
-	- The quantity that was returned
-	- If the return is accepted (acceptReturn)
-	- A condition must be specified
-	- A reason can be specified
-	- A additional note that can be stored.
+- Once the return has arrived, the seller will check the items and confirm the return using `POST /v1/seller/order/return`.
+- If a return already exists in JTL -Wawi, the information stored there should be used to transfer the return to SCX.
+  - This information includes the `channelReturnId`.
+- Furthermore, the following information about the individual order items must be transferred:
+  - The order number (orderId)
+  - The quantity that was returned
+  - If the return is accepted (acceptReturn)
+  - A condition must be specified
+  - A reason can be specified
+  - An additional note that can be stored
 
-## Refund
+### Refund
 
 ![](refund.png)
 
-Refunds are initiated directly by the merchant, e.g. after a return has been processed or following an agreement with the buyer (via ticket/email/phone). The channel processes the refund and sends a `Channel:Order.RefundProcessingResult` after a success or failure 
-back to the merchant to ensure that a refund has been properly processed. 
+Refunds are initiated directly by the seller, e.g. after a return has been processed or following an agreement with the 
+buyer (via ticket/email/phone). The channel processes the refund and sends a `Channel:Order.RefundProcessingResult` 
+after a success or failure back to the seller to ensure that a refund has been properly processed.
 
-# Links and other Resources
+## Links and other Resources
 
 Channel-API Documentation
 https://scx-sandbox.ui.jtl-software.com/docs/api_channel.html
@@ -1012,9 +1115,3 @@ https://www.postman.com/jtl-eazyauction/workspace/jtl-scx-public
 
 JTL-Guide 
 https://guide.jtl-software.de/
-
-
-
-
-
-
