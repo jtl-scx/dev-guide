@@ -71,6 +71,44 @@ Error responses are indicated by an HTTP status code >=400. The Channel API uses
 
 We are supporting language `de` (German) as default. This can be changed to `en` by setting the `Accept-Language` header.
 
+## Authorization
+
+To request an access token, use the following cURL command:
+
+```bash
+curl -XPOST '/v1/auth' --form 'refreshToken=YOUR-REFRESH-TOKEN'
+```
+
+The response will be a JSON object containing the following fields:
+
+```json
+{
+  "scope": "CHANNEL",
+  "authToken": "eyJ0eXAi....",
+  "tokenExpireAt": "2024-05-14T10:07:42+02:00",
+  "expiresIn": 3600
+}
+```
+
+* scope: The scope of the access token. In this case, it is "CHANNEL".
+* authToken: The token to be used for authenticating further requests.
+* tokenExpireAt: The expiration date and time of the token in ISO 8601 format.
+* expiresIn: The time in seconds until the token expires (TTL - Time To Live).
+
+Use the authToken received from the above response as a Bearer Token in the `Authorization` header for all further requests.
+
+Example:
+
+```bash
+curl --location --request POST '/v1/seller/channel/MYCHANNEL' \
+--header 'Authorization: Bearer eyJ0eXAi....'
+```
+
+**Important Note**
+The authToken has a TTL (Time To Live). Make sure to respect this to avoid rate limiting. 
+This means you should monitor the `expiresIn` value and refresh the token moments before it expires to 
+maintain uninterrupted access.
+
 ## Rate Limiting
 
 API Rate Limiting is the practice of restricting the number of requests a user can make to an API within a given timeframe. 
